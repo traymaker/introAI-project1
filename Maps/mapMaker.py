@@ -1,11 +1,13 @@
 import numpy as np
-from random import *
 
-for n in range(51):
+from random import *
+from util import *
+
+for n in range(DIM):
 	mat = []
-	for x in range(101):
+	for x in range(DIM):
 		mat.append([])
-		for y in range(101):
+		for y in range(DIM):
 			if (random() < 0.7):
 				mat[x].append(0)
 			else:
