@@ -1,20 +1,10 @@
 import pygame as pg
 import time, timeit
 import numpy as np 
-
-from util import *
 from AStar import *
 
-class Cell(object):	
-	def __init__(self, x, y, color):
-		self.x = x
-		self.y = y
-		self.color = color
-		#to be used in A*
-		self.parent = None
-		self.f = 0
-		self.g = 0
-		self.h = 0
+from util import *
+from binaryHeap import *
 
 def initMap():
 	n = input('Enter a map number from 0 to 49: \n')
@@ -24,6 +14,7 @@ def initMap():
 	
 	fp = 'Maps/' + 'map' + str(n) + '.txt'
 	fs = open(fp, 'r')
+
 	lines = fs.readlines()
 	tempArray = []
 	tempCell = None
@@ -33,77 +24,127 @@ def initMap():
 		line = list(map(int, line))
 		tempArray.append(line)
 
-	for i in range(DIM):
-		for j in range(DIM):
-			tempArray[i][j] = Cell(i, j, tempArray[i][j])
-
 	return tempArray
 
+def drawMap():
+	for i in range(HEIGHT):
+		for j in range(WIDTH):
+			color = BLUE
+			
+			if grid[i][j] == 0:
+				color = WHITE
+			elif grid[i][j] == 1:
+				color = BLACK
+			elif grid[i][j] == 2:
+				color = RED
+			elif grid[i][j] == 3:
+				color = GREEN
+			
+			pg.draw.rect(screen, color,
+				[(PAD + SIZE) * j + PAD, (PAD + SIZE) * i + PAD, SIZE, SIZE])
+
+	pg.display.flip()
+
+def clearMap():
+	for i in range(HEIGHT):
+		for j in range(WIDTH):
+			if (grid[i][j] == 0):
+				color = WHITE
+			elif (grid[i][j] == 2):
+				color = RED
+			elif (grid[i][j] == 3):
+				color = GREEN
+			
+			pg.draw.rect(screen, color,
+				[(PAD + SIZE) * j + PAD, (PAD + SIZE) * i + PAD, SIZE, SIZE])
+			pg.display.flip()
+
+	print('Path Cleared')
+
 pg.init()
-screen = pg.display.set_mode((((DIM * 8) + 1), ((DIM * 8) + 1)))
+screen = pg.display.set_mode((((HEIGHT * 8) + 1), ((WIDTH * 8) + 1)))
 pg.display.set_caption("DisplayStar")
 clock = pg.time.Clock()
+done = False
 pg.display.flip()
 
 distance = 0
 start = 0.0
 stop = 0.0
 runTime = 0.0
-gValue = 0 #gValue Hi/Lo 0 is low 1 is high
-done = False
+
 start_state = (0, 0)
 goal_state  = (100, 100)
+grid = []
 
-regAstar = AStar(DIM, screen, start_state, goal_state) 
+tieBreak = 0
 
-#TODO
-#implement algo controllers in AStar.py
 while not done:
 	for event in pg.event.get():  
 		if (event.type == pg.QUIT): #Exit button quits program  
 			done = True  
 		elif event.type == pg.KEYDOWN:
-			if (event.key == pg.K_c):	#c key press Clears screen of previous A* Star Path on current map
-				#TODO
-				#make this a function too
-				for row in range(DIM):
-					for column in range(DIM):
-						if (grid[row][column].color == 0):
-							color = WHITE
-							grid[row][column].color = 0
-							pg.draw.rect(screen, color, [(PAD + SIZE) * column + PAD, (PAD + SIZE) * row + PAD,SIZE, SIZE])
-
-				pg.display.flip()
-				time = 0
-				distance = 0
-				print('Path Cleared')
-			elif (event.key == pg.K_l):	#l key press Loads/initializes a new map
+			if (event.key == pg.K_l):	#l key press Loads/initializes a new map 
 				grid = initMap()
-				#TODO
-				#put this for in the initMap function 
-				for row in range(DIM):
-					for column in range(DIM):
-						color = BLUE
-						
-						if grid[row][column].color == 0:
-							color = WHITE
-						elif grid[row][column].color == 1:
-							color = BLACK
-						elif grid[row][column].color == 2:
-							color = RED
-						elif grid[row][column].color == 3:
-							color = GREEN
-						pg.draw.rect(screen, color,
-							[(PAD + SIZE) * column + PAD, (PAD + SIZE) * row + PAD, SIZE, SIZE])
+				drawMap()
+			elif (event.key == pg.K_c):	#c key press Clears screen of previous A* Star Path 
+				clearMap()
+			elif (event.key == pg.K_1):	#Forward A* with Low G-Value Tie-Break
+				tieBreak = 0
+				start = timeit.default_timer()
+				aStar = AStar(screen, grid, start_state, goal_state)
+				g = aStar.show_Astar(tieBreak)
+				stop = timeit.default_timer()
 
 				pg.display.flip()
-			elif (event.key == pg.K_1):	#Forward A* with Low G-Value Tie-Break:
-				print("test")
-			# elif event.key == pg.K_2:	#Forward A* with High G-Value Tie-Break:
-			# elif event.key == pg.K_3:	#Backward A* with Low G-Value Tie-Break:
-			# elif event.key == pg.K_4:	#Backward A* with High G-Value Tie-Break:
-			# elif event.key == pg.K_5:	#Adaptive A* with Low G-Value Tie-Break:
-			# elif event.key == pg.K_6:	#Adaptive A* with High G-Value Tie-Break:
+
+				runTime = stop - start
+				print(runTime)
+			elif event.key == pg.K_2:	#Forward A* with High G-Value Tie-Break
+				tieBreak = 1
+				start = timeit.default_timer()
+				aStar = AStar(screen, grid, start_state, goal_state)
+				g = aStar.show_Astar(tieBreak)
+				stop = timeit.default_timer()
+
+				pg.display.flip()
+
+				runTime = stop - start
+				print(runTime)
+			elif event.key == pg.K_3:	#Backward A* with Low G-Value Tie-Break
+				tieBreak = 0
+				start = timeit.default_timer()
+				aStar = AStar(screen, grid, goal_state, start_state)
+				g = aStar.show_Astar(tieBreak)
+				stop = timeit.default_timer()
+
+				pg.display.flip()
+
+				runTime = stop - start
+				print(runTime)
+			elif event.key == pg.K_4:	#Backward A* with High G-Value Tie-Break
+				tieBreak = 1
+				start = timeit.default_timer()
+				aStar = AStar(screen, grid, goal_state, start_state)
+				g = aStar.show_Astar(tieBreak)
+				stop = timeit.default_timer()
+
+				pg.display.flip()
+
+				runTime = stop - start
+				print(runTime)			
+			
+			# elif event.key == pg.K_5:	#Adaptive A* with Low G-Value Tie-Break
+			# 	tieBreak = 0
+			# 	start = timeit.default_timer()
+			# 	aStar = AStar(screen, grid, start_state, goal_state)
+			# 	g = aStar.show_AdaptiveAStar()
+			# 	stop = timeit.default_timer()
+
+			# 	pg.display.flip()
+
+			# 	runTime = stop - start
+			# 	print(runTime)
 
 	pg.display.flip()
 
