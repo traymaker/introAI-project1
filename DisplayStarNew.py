@@ -136,7 +136,7 @@ while not done:
                 runTime = stop - start
                 print(runTime)
 
-            elif event.key == pg.K_5:  # Adaptive A* with Low G-Value Tie-Break
+            elif event.key == pg.K_5:  # Adaptive A* with High G-Value Tie-Break
                 tieBreak = 2
                 start = timeit.default_timer()
                 aStar = AStarNew(screen, grid, start_state, goal_state)

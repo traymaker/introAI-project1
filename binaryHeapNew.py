@@ -1,13 +1,21 @@
+from random import *
+
 class binaryHeapNew:
     def __init__(self):
         self.heap = []
 
     def siftUp(self, index1):
-        if ((self.heap[index1]) < (self.heap[int((index1 - 1) / 2)])):
+        if self.get_item(index1)[0] < self.get_item(int((index1 - 1) / 2))[0]:
             temp = self.heap[index1]
             self.heap[index1] = self.heap[int((index1 - 1) / 2)]
             self.heap[int((index1 - 1) / 2)] = temp
             self.siftUp(int((index1 - 1) / 2))
+        if self.get_item(index1)[0] == self.get_item(int((index1 - 1) / 2))[0]:
+            if random() >= .5:
+                temp = self.heap[index1]
+                self.heap[index1] = self.heap[int((index1 - 1) / 2)]
+                self.heap[int((index1 - 1) / 2)] = temp
+                self.siftUp(int((index1 - 1) / 2))
 
     def siftDown(self, index2):
         if ((len(self.heap) - 1) >= ((index2 * 2) + 1)):
@@ -44,14 +52,24 @@ class binaryHeapNew:
     def len(self):
         return len(self.heap)
 
-    def get(self, index):
-        try:
-            return self.heap[index]
-        except:
-            return 0
+    def get(self, item):
+        i = 0
+        for x in self.heap:
+            if x[1] == item:
+                return i
+            i = i + 1
+        return 0
+
+    def get_item(self, index):
+        return self.heap[index]
 
     def get_heap(self):
         return self.heap
+
+    def set_item(self, index, item):
+        self.heap[index] = item
+        self.siftUp(index)
+        return
 
     def printAll(self):
         for i in range(len(self.heap)):
