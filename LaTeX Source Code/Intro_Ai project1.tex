@@ -22,62 +22,82 @@ The agent will move toward the cell with the lowest $f$-value. The $f$-value is 
 \subsection{}
 The answer has been divided into four cases:
 \begin{enumerate}
-	\item Case 1: In an infinite grid, the agent can find the target and the target is reachable. Yes, a path can be found in finite time. 
+	\item Case 1: In an infinite grid, the agent can find the target and the target is reachable. Yes, a path can be found and in finite time. 
 		\newline The agent will go about expanding reachable nodes that decrease in $f$-value over time. This will lead it closer and closer to the target until eventually it will encounter the target and stop. Assuming the target is not moving, it will be a finite distance away and therefore only a finite number of cells with generally decreasing $f$-values will be expanded between the agent and the target. 		
 		
 	\item Case 2: In an infinite grid, The agent can tell there is no solution when the target is unreachable. A solution cannot be found; this case does not exist.
 		\newline The agent will expand all reachable nodes and even though the values of $f$ will be generally decreasing, if the target is unreachable, the agent will resort to cells with higher and higher $f$-values which in an infinite grid are also infinite and will thus never terminate. 
 		
-	\item Case 3: In a finite grid, the agent makes upper-bounded number of moves when the target is reachable. Yes, an upper-bound exists.
-		\newline Even in the worst case scenario where agent must expand every cell, there are only a finite number of them, so the number of moves will never exceed the size of the grid. In other words the number of moves will be less than or equal to the size of the grid. 
-		
-	\item Case 4: In a finite grid, the agent makes an upper-bounded number of moves when the target is unreachable. Unlike case 2, an upper-bound exists. 
-		\newline It is in fact the same bound as case 3 and follows the same reasoning. Though the number of moves to find an unreachable cell does have a different lower bound. It will have to investigate every reachable cell in the finite grid before determining that the target is not in the finite grid. 
+	\item Case 3: In a finite grid, the agent makes an upper-bounded number of moves when the target is reachable. Yes, an upper-bound $n^2$ exists.
+        		\newline In a theoretical worst case scenario, the agent must replan n times in order to find the goal, one replan for each tile on the map. With each replan it is forced to expand every node on the grid, meaning that each replan makes n moves. In this case, the worst possible, the number of moves is upper-bounded by $n^2$.
+
+   	\item Case 4: In a finite grid, the agent makes an upper-bounded number of moves when the target is unreachable. Unlike case 2, an upper-bound exists. 
+        		\newline It is in fact the same bound as case 3 and follows the same reasoning. The agent will have to investigate n cells in the finite grid with each of n replans before determining that the target is unreachable, for $n^2$ total moves.
 		
 \end{enumerate}
 
-
 \section{Part 2: The Effects of Ties}
-Tie-breaking is important in the planning phase of the A* search. Favoring high $g$-values, in its attempt to 'greedily' find a solution as fast as possible, sometimes ended up trapped in dead end areas with no way forward, being forced to backtrack significantly. Favoring low $g$-values, on the other hand, performs a slower but safer search. In this way, favoring low $g$-values is akin to BFS while favoring high $g$-values is akin to DFS. Of course, the average and best case scenarios of Favoring high $g$-values are much better than those of Favoring low $g$-values.
+Tiebreaking was important in the planning phase of the A* search. Low-g tiebreaking meant prioritizing tied neighbors that were closer to the start in the heap. High-g meant the opposite. From our data low-g was able to find very slightly shorter paths in slightly shorter times than high-g was. This seems counterintuitive, given that in the example problem a high-g search will drastically outperform low-g by cutting straight to the goal where low-g explores other nodes, but it is worth considering that high-g's worst case was often worse than low-g's. High-g searches favored diving toward the goal, which for an uncluttered map is optimal, but our map had enough obstacles that every search was significantly hampered. High-g, in its attempt to 'greedily' find a solution as fast as possible, sometimes ended up trapped in dead end areas with no way forward, being forced to backtrack significantly. Low-g, on the other hand, performed a slower but safer search. In this example low-g is more akin to BFS while high-g played a similar role to DFS. Of course, the average and best case scenarios of high-g are much better than those of low-g. With more maps and more data, perhaps a higher density of average cases would have shown high-g to perform better overall.
 
-In our implementation, tie-breaking in favor of low $g$-values meant prioritizing tied neighbors that were closer to the start in the heap. Tie-breaking in favor of high $g$-values meant the opposite. Overall, we observed for that favoring a high or low $g$ in the case of a tie value had little actual effect on the performance of the Repeated Forward A* search. On average, the runtime for favoring low $g$ was ~5.84 seconds. Favoring high $g$ was nearly identical, being slower on average only by a hundredth of a second at ~5.86 seconds. Investigating further, we see the medians are still only fractions of a second in difference  different with Though our runtimes were nearly identical, using g to tiebreak would likely be useful for performance on an empty map as it would help limit expansions. In the maps provided, the amount of obstacles in the way means that there is relatively little gain with manipulating $g$. With more maps and more data, perhaps a higher density of average cases would have shown that tie-breaking in favor of high $g$-values will perform better overall.
+On average, the runtime for favoring low $g$ was ~5.84 seconds. Favoring high $g$ was nearly identical, being slower on average only by a hundredth of a second at ~5.86 seconds. Investigating further, we see the medians are still only fractions of a second different with.Though our average runtimes were nearly identical, using g to tiebreak would likely be useful for performance on an empty map as it would help limit expansions. In the maps provided, the amount of obstacles in the way means that there is relatively little gain with manipulating $g$. With more maps and more data, perhaps a higher density of average cases would have shown that tie-breaking in favor of high $g$-values will perform better overall.
  	
 \section{Part 3: Forward vs. Backward}
 The Repeated Forward A* search and Repeated Backward A* search were both able to find possible solutions, where solutions existed, but their exact paths differed in most cases. The difference comes from the path planning and replanning. Because Repeated Backward A* plans from the goal, different blocked and unblocked cells are found at each iteration. Neither method’s path was consistently superior to that of the other. This is likely because that although they solved the same maze, each one had different information available to them as they could only see cells near them. As such, their differing starting locations led them down different paths. Neither method’s path was consistently superior to that of the other, but the backwards paths tended to have worse runtimes, perhaps due to the fact that we only animated the projected paths of A* in the first quadrant. Although the forward searches would have longer projected paths, the amount of replans for the backward searches was likely higher in the first quadrant as the searches neared their goal and the amount of available moves became more limited.
 
 \section{Part 4: Heuristics in the Adaptive A* (i)}
-The "Manhattan Distance" can be described as the number of moves required to reach a goal given no obstacles. Therefore, it makes sense that said distance will be consistent. If an h-value in adaptive A* becomes inconsistent, it is because something is in the way. In this case, the heuristic will be updated and will become consistent again. \newline
-Given a node s and neighbor m: \newline
-%INCOMPLETE: PROOF OF ADAPTIVE H-VALUE
+The "Manhattan Distance" can be described as the number of moves required to reach a goal given no obstacles. More formally it is the function $d(a , b) = (|x_{a} - x_{b}|) + (|y_{a} - y_{b}|)$ where $a$ is the current state and $b$ is the next state.
 
-\section{Part 5:  Heuristics in the Adaptive A* (iI)}
-Our Adaptive A* method was able to find shorter paths than Repeat Forward A* on average, but it also took a longer time. This is likely due to it attempting to avoid previous projected paths and move in new directions. Our A* recalculated the heuristic value of every tile that was expanded by the previous A* search upon replanning, increasing their cost by using g(sgoal)-g(s) and incentivising the algorithm to explore alternatives.  By doing so it was sometimes able to find a better path at the cost of runtime. Ties were broken randomly and each search weighed in favor of larger g values.
+ A Consistent Heuristic must satisfy the inequality $h(N) \leq c(N , P) + h(P)$ and initial condition $h(G) = 0$ where $N$ is the current node, $P$ is any descendent of $N$, and $G$ is the target or goal. The proof that the Manhattan Distance follows:
+
+\begin{enumerate}
+\item For the initial condition, $d(G , G) = (|x_{G} - x_{G}|) + (|y_{G} - y_{G}|) = 0$ which makes sense because the distance from the goal to itself is 0. So $h(G) = 0$ is satisfied. 
+\item For the inequality, $P$ can only take on one of four directions each a distance of 1 away from its parent $N$, making $c(N , P)$ always equal to 1. 
+\item Now we have $h(N) \leq 1 + h(P)$, we will then substitute $h(N)$ and $h(P)$
+\item $(|x_{S} - x_{N}|) + (|y_{S} - y_{N}|) \leq 1 + (|x_{S} - x_{P}|) + (|y_{S} - y_{P}|)$, where we now see that the coordinates of $P$ can be replaced with $N$'s coordinates plus 1 based off of premise 2.
+\item $(|x_{S} - x_{N}|) + (|y_{S} - y_{N}|) \leq 1 + 1 + (|x_{S} - x_{N}|) + (|y_{S} - y_{N}|)$ and with some algebra 
+\item $0\leq2$
+\end{enumerate}
+
+Therefore, it makes sense that the Manhattan Distance will be consistent because the consistent inequality holds true. 
+
+In Adaptive A*, $h(n)$ can sometime change to $g(s_{goal}) - g(s)$ when an a previously expanded node is encountered. Any value that has not been expanded will remain unchanged, making its $h(n)$ still the Manhattan Distance and still consistent. The new heuristic is consistent because although its based off of olpath costs, a new path will be calculated that will be equal to or longer than the previous path and so the respective $g$-values will be less than or equal to their new path values. 
+
+\section{Part 5:  Heuristics in the Adaptive A* (ii)}
+Our Adaptive A* method was able to find shorter paths than Repeat Forward A* on average, but it also took a longer time. This is likely due to it attempting to avoid previous projected paths and move in new directions. Our A* recalculated the heuristic value of every tile that was expanded by the previous A* search upon replanning, increasing their cost by using $h(n) = g(s_{goal}) - g(s)$ and incentivizing the algorithm to explore alternatives.  By doing so it was sometimes able to find a better path at the cost of runtime. Ties were broken randomly and each search weighed in favor of larger g values.
 
 \section{Part 6: Memory Issues}
 
 \subsection{Improvements to Our Implementation}
-We currently use Python's tuples to record $(x , y)$ coordinate information. According to Python's "sizeof" function, for one, 2-integer tuple, the memory consumption is 40 bytes. We could reduce this by storing the coordinates in the minimum number of bits it takes to store two integer values between $0 \rightarrow 100$. This would be 7 bits per value and 14 total. We could then also keep the tree pointers on two bits with 00, 01, 10, 11 corresponding to whether the neighbor is N, S, E, W of the current node. We can do this because the neighbors are only in discrete directions. 
+We currently use Python's tuples to record $(x , y)$ coordinate information. According to Python's "sizeof" function, for one, 2-integer tuple, the memory consumption is 40 bytes. We could reduce this by storing the coordinates in the minimum number of bits it takes to store two integer values between $0 \rightarrow 100$. This would be 7 bits per value and 14 total. We could then also keep the tree pointers on two bits with 00, 01, 10, 11 corresponding to whether the neighbor is N, S, E, W of the current node. We can do this because the neighbors are only in discrete directions. Altogether, we could store grid information, excluding the storage of f(n), g(n), and h(n) values, at 16 bits a cell. 
 
 \subsection{Calculations}
-(1,001 x 1,001) = 1002001 cells \newline
-At 2 bits per cell: \newline
-2 * 1002001  = 2,004,002 bits ~ 250 kB \newline \newline
+$(1,001 x 1,001) = 1002001$ cells \newline
+At 16 bits per cell: \newline
+$16 * 1002001  = $ 16032016 bits or roughly 2MB \newline \newline
 
-4MB = 32000000 bits \newline
-At 2 bits per cell: \newline
-	16000000 cells possible \newline 
-	grid size = sqrt(16000000) = 4000 x 4000 grid
+4MB  is 32000000 bits \newline
+At 16 bits per cell: \newline
+	2000000 cells are possible \newline 
+	the max grid size is the floor of the square root of the number of possible cells \newline
+	$\left \lceil{\sqrt(2000000}\right \rceil ~1414.2$ \newline 
+	So only a 1414 x 1414 grid is possible
 
 \section{Data, Methods, and Observations}
 
-Data was collected for Repeat Forward A* with Tie-breaking in favor of Low $g$-values, Repeat Forward A* with Tie-breaking in favor of High $g$-values,  Repeat Backward A* with Tie-breaking in favor of Low $g$-values, Repeat Backward A* with Tie-breaking in favor of High $g$-values, Adaptive A* with Tie-breaking in favor of High $g$-values algorithms. The searches were each performed on the 50 maps generated in Part 0. The start and end goal were standardized to $(0,0)$ and $(100,100)$. Of the 50, 26 had solutions. The 24 without solutions are marked in red and their runtimes are not included in the data because animation conflicted with reporting significant and comparable runtimes. For each of the 5 algorithms, we have calculated and provided a median and mean runtime. These values are recorded in the Figure 1:
-
-\begin{figure}[!htbp]
-	\includegraphics[angle=0, origin=c, width =  0.68\textwidth]{data1.jpg}
-	\caption{Our Data}
-\end{figure}
-\FloatBarrier
+Data was collected for Repeat Forward A* with Tie-breaking in favor of Low $g$-values, Repeat Forward A* with Tie-breaking in favor of High $g$-values,  Repeat Backward A* with Tie-breaking in favor of Low $g$-values, Repeat Backward A* with Tie-breaking in favor of High $g$-values, Adaptive A* with Tie-breaking in favor of High $g$-values algorithms. The searches were each performed on the 50 maps generated in Part 0. The start and end goal were standardized to $(0,0)$ and $(100,100)$. Of the 50, 26 had solutions. The 24 without solutions are marked in red and their runtimes and paths are not included in the data because animation conflicted with reporting significant and comparable runtimes and paths. For each of the 5 algorithms, we have calculated and provided a median and mean path and runtime. 
 
 Sources of error can be attributed to small sample size and random choices in cases of $g$-values also tying. If there were more time, we would have like to address the small sample size by generating more graphs that tested specific edge cases as well as graphs at varying amounts of blockages. As well, the randomization in the implementation can lead to variance in the paths taken and nodes expanded even by the same search on the same map. Finally, optimization differences between different hardware and software may also have played a role in the uniformity of our data. We acknowledge these issues and have answered the as best as possible. 
+
+\begin{figure}
+	\includegraphics[angle=0, origin=c, width =  0.7\textwidth]{data1.jpg}
+	\caption{Our Run Time Data}
+	
+	\vspace*{\floatsep}
+	
+	\includegraphics[angle=0, origin=c, width =  0.7\textwidth]{data2.jpg}
+	\caption{Our Path Data}
+\end{figure}
+
+
 
 \end{document}
