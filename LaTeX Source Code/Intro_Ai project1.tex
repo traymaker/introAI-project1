@@ -68,19 +68,18 @@ Our Adaptive A* method was able to find shorter paths than Repeat Forward A* on 
 \section{Part 6: Memory Issues}
 
 \subsection{Improvements to Our Implementation}
-We currently use Python's tuples to record $(x , y)$ coordinate information. According to Python's "sizeof" function, for one, 2-integer tuple, the memory consumption is 40 bytes. We could reduce this by storing the coordinates in the minimum number of bits it takes to store two integer values between $0 \rightarrow 100$. This would be 7 bits per value and 14 total. We could then also keep the tree pointers on two bits with 00, 01, 10, 11 corresponding to whether the neighbor is N, S, E, W of the current node. We can do this because the neighbors are only in discrete directions. Altogether, we could store grid information, excluding the storage of f(n), g(n), and h(n) values, at 16 bits a cell. 
+We currently use Python's tuples to record $(x , y)$ coordinate information. According to Python's "sizeof" function, for one, 2-integer tuple, the memory consumption is 40 bytes. We could reduce this by storing the coordinates in the minimum number of bits it takes to store two integer values between $0 \rightarrow 100$. This would be $~log_{2}(101)$ or 7 bits per value and 14 total. We could then also keep the tree pointers on two bits with 00, 01, 10, 11 corresponding to whether the neighbor is N, S, E, W of the current node. We can do this because the neighbors are only in discrete directions. Altogether, we could store grid information, excluding the storage of f(n), g(n), and h(n) values, at 16 bits a cell. 
 
 \subsection{Calculations}
 $(1,001 x 1,001) = 1002001$ cells \newline
-At 16 bits per cell: \newline
-$16 * 1002001  = $ 16032016 bits or roughly 2MB \newline \newline
+At $log_{2}(1001) * 2$ or 20 bits per coordinate and 2 for the parent we get 22 bits per cell: \newline
+$22 * 1002001  = $ 22044022 bits or roughly 2.8MB \newline \newline
 
 4MB  is 32000000 bits \newline
-At 16 bits per cell: \newline
-	2000000 cells are possible \newline 
-	the max grid size is the floor of the square root of the number of possible cells \newline
-	$\left \lceil{\sqrt(2000000}\right \rceil ~1414.2$ \newline 
-	So only a 1414 x 1414 grid is possible
+$32000000 = 2log_{2}(x)  + 2x$ \newline
+$x = 16000000$ cells \newline
+$\sqrt{16000000}$ or 4000 X 4000 grid
+
 
 \section{Data, Methods, and Observations}
 
