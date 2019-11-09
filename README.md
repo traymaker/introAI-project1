@@ -3,12 +3,13 @@ By Tim Raymaker and Michael Rizzo
 
 This Python project demonstrates the Repeat Forward Astar, Repeat Backward Astar, and Adaptive Astar Algorithms. It uses Pygame to display the 101x101 grid worlds.
 
-## Getting Started ##
+## Getting Started
 Start by downloading the repository/zip file. The main file to compile and run is DisplayStar.py. Please use python 3.6 or newer. 
 
 Prequisites for running the DisplayStar.py are provided below. 
 
-### Prerequisites ###
+### Prerequisites 
+
 The only non-standard library our project uses is: 
 
 [Pygame](https://www.pygame.org/)
@@ -16,8 +17,7 @@ The only non-standard library our project uses is:
 To install this library, there exists a pip install for Pygame.
 
 
-## How to Use DisplayStar.py ##
-
+## How to Use DisplayStar.py 
 In the main pygame window:
 
 Press l to load a map or clear a previous search path by reloading the same map
@@ -31,4 +31,4 @@ Key presses must be done in the game window. When pressing L, the user will be p
 
 Projected paths will be displayed in blue and they are only displayed for the first quadrant of the map, after which they stop. This is to improve runtime. Expanded cells are displayed in yellow. The total path is displayed in red. The start state is initially displayed in red and the goal state is initially displayed in green. Blocked cells are in black and unblocked cells are in white. 
 
-## Also Included in the Repo##
+## Also Included in the Repo
